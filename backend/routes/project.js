@@ -23,19 +23,19 @@ router.post(
   createProject
 );
 
-// router.get(
-//   "/:projectId",
-//   authMiddleware,
-//   validateRequest({
-//     params: z.object({ projectId: z.string() }),
-//   }),
-//   getProjectDetails
-// );
+router.get(
+  "/:projectId",
+  authMiddleware,
+  validateRequest({
+    params: z.object({ projectId: z.string() }),
+  }),
+  getProjectDetails
+);
 
-// router.get(
-//   "/:projectId/tasks",
-//   authMiddleware,
-//   validateRequest({ params: z.object({ projectId: z.string() }) }),
-//   getProjectTasks
-// );
+router.get(
+  "/:projectId/tasks",
+  authMiddleware,
+  validateRequest({ params: z.object({ projectId: z.string() }) }),
+  getProjectTasks
+);
 export default router;
