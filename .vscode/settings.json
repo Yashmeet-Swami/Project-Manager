@@ -1,0 +1,13 @@
+{
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "C_Cpp.copilotHover": "enabled",
+    "github.copilot.advanced": {
+
+
+    },
+    "github.copilot.chat.codesearch.enabled": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.inlineSuggest.suppressSuggestions": false,
+    "github.copilot.chat.languageContext.inline.typescript.enabled": true,
+    "emmet.useInlineCompletions": true
+}
