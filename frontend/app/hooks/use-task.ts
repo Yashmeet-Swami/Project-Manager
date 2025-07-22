@@ -210,12 +210,12 @@ export const useArchivedTaskMutation = () => {
   });
 };
 
-// export const useGetMyTasksQuery = () => {
-//   return useQuery({
-//     queryKey: ["my-tasks", "user"],
-//     queryFn: () => fetchData("/tasks/my-tasks"),
-//   });
-// };
+export const useGetMyTasksQuery = () => {
+  return useQuery({
+    queryKey: ["my-tasks", "user"],
+    queryFn: () => fetchData("/tasks/my-tasks"),
+  });
+};
 
 
 
