@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import Header from '@/components/ui/layout/header';
+import { Header } from '@/components/ui/layout/header';
 import { SidebarComponent } from '@/components/ui/layout/sidebar-component';
 import { Loader } from '@/components/ui/loader';
 import { CreateWorkspace } from '@/components/workspace/create-workspace';
