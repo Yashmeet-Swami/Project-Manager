@@ -28,7 +28,7 @@ const PORT = process.env.PORT || 5000
 
 app.get("/", async (req, res) => {
     res.status(200).json({
-        message: "Welcome to SkillHub API",
+        message: "Welcome to TaskSync API",
     });
 });
 

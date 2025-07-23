@@ -41,7 +41,7 @@ const transporter = nodemailer.createTransport({
 
 export const sendEmail = async (to, subject, html) => {
   const mailOptions = {
-    from: `"TaskHub" <${process.env.EMAIL_USER}>`,
+    from: `"TaskSync" <${process.env.EMAIL_USER}>`,
     to,
     subject,
     html,
