@@ -1,20 +1,18 @@
-import { signUpSchema } from "@/lib/schema";
-import { Button } from "@/components/ui/button";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "react-router"; // or react-router-dom if using web routing
-import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Link, useNavigate } from "react-router";
+import { motion } from "framer-motion";
+import Lottie from "lottie-react";
+import LoginAnimation from "@/assets/Login.json";
 
+import { signUpSchema } from "@/lib/schema";
+import { useSignUpMutation } from "@/hooks/use-auth";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -23,8 +21,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useSignUpMutation } from "@/hooks/use-auth";
-import { toast } from "sonner";
+
+import { Mail, User, Lock, Check } from "lucide-react";
 
 export type SignupFormData = z.infer<typeof signUpSchema>;
 
@@ -40,153 +38,164 @@ const SignUp = () => {
     },
   });
 
-  const {mutate , isPending} = useSignUpMutation();
+  const { mutate, isPending } = useSignUpMutation();
 
   const handleOnSubmit = (values: SignupFormData) => {
-    mutate(values , {
+    mutate(values, {
       onSuccess: () => {
-          toast.success("Email Verification Required" ,{
-            description: "please check your email for a verification link. If you dont see it , please check your spam folder.",
-          });
-          form.reset();
-          navigate("/sign-in");
+        toast.success("Email Verification Required", {
+          description: "Check your email for a verification link.",
+        });
+        form.reset();
+        navigate("/sign-in");
       },
-      onError: (error : any) => {
-          const errormsg = error.response?.data?.message || "An error occured";
-          console.log(error);
-          toast.error(errormsg);
+      onError: (error: any) => {
+        const errMsg = error.response?.data?.message || "An error occurred";
+        toast.error(errMsg);
       },
-    })
+    });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white p-4">
-      <Card className="w-full max-w-md rounded-xl shadow-md border border-gray-200 bg-white">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center text-gray-900">
-            Create an Account
-          </CardTitle>
-          <CardDescription className="text-center text-muted-foreground">
-            Join us by creating a new account
-          </CardDescription>
-        </CardHeader>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#c2d4ff] via-[#e2d6f3] to-[#f3e8ff] p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-white rounded-2xl shadow-2xl flex w-full max-w-5xl overflow-hidden border border-indigo-100"
+      >
+        {/* Lottie Animation */}
+        <div className="hidden md:flex w-1/2 bg-gradient-to-br from-blue-100 to-purple-100 items-center justify-center p-6">
+          <Lottie
+            animationData={LoginAnimation}
+            loop
+            autoplay
+            className="w-full h-auto max-w-md"
+          />
+        </div>
 
-        <CardContent>
+        {/* Form Section */}
+        <div className="w-full md:w-1/2 p-8 md:p-10">
+          <h1 className="text-2xl font-bold text-indigo-700 text-center mb-1">
+            Create Your Account
+          </h1>
+          <p className="text-sm text-center text-gray-500 mb-6">
+            Start your journey with us 🚀
+          </p>
+
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(handleOnSubmit)}
-              className="space-y-5"
+              className="space-y-4"
             >
-              {/* Name Field */}
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700">
-                      Full Name
-                    </FormLabel>
+                    <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="John Doe"
-                        className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-400" />
+                        <Input
+                          className="pl-10 focus-visible:ring-indigo-400"
+                          placeholder="John Doe"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Email Field */}
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700">
-                      Email Address
-                    </FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="email@example.com"
-                        className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-400" />
+                        <Input
+                          className="pl-10 focus-visible:ring-indigo-400"
+                          placeholder="email@example.com"
+                          type="email"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Password Field */}
               <FormField
                 control={form.control}
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700">
-                      Password
-                    </FormLabel>
+                    <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="********"
-                        className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-400" />
+                        <Input
+                          className="pl-10 focus-visible:ring-indigo-400"
+                          placeholder="••••••••"
+                          type="password"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Confirm Password Field */}
               <FormField
                 control={form.control}
                 name="confirmPassword"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm text-gray-700">
-                      Confirm Password
-                    </FormLabel>
+                    <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="********"
-                        className="focus-visible:ring-2 focus-visible:ring-blue-500"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Check className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-indigo-400" />
+                        <Input
+                          className="pl-10 focus-visible:ring-indigo-400"
+                          placeholder="••••••••"
+                          type="password"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              {/* Submit Button */}
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 rounded-md transition-colors"
-                disabled={isPending}>
-                  {isPending ? "Signing up..." : "Sign up"}
+                className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 hover:from-indigo-600 hover:to-blue-600 text-white font-semibold py-2 rounded-md transition-all shadow-md"
+                disabled={isPending}
+              >
+                {isPending ? "Signing up..." : "Sign Up"}
               </Button>
             </form>
           </Form>
-        </CardContent>
 
-        <CardFooter>
-          <div className="w-full text-center text-sm text-muted-foreground">
+          <p className="text-xs text-gray-500 mt-6 text-center">
             Already have an account?{" "}
             <Link
               to="/sign-in"
-              className="text-blue-600 hover:underline font-medium"
+              className="text-indigo-600 hover:underline font-medium"
             >
               Sign in
             </Link>
-          </div>
-        </CardFooter>
-      </Card>
+          </p>
+        </div>
+      </motion.div>
     </div>
   );
 };
