@@ -53,4 +53,16 @@ const deleteData = async <T>(url: string): Promise<T> => {
   return response.data;
 };
 
+// In your fetch-util.ts
+export const postFormData = async (url: string, formData: FormData) => {
+  const response = await axios.post(`${BASE_URL}${url}`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  return response; // Return full response object
+};
+
+
 export { postData, fetchData, updateData, deleteData };

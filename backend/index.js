@@ -3,8 +3,17 @@ import dotenv from "dotenv"
 import express from "express"
 import mongoose from "mongoose"
 import morgan from "morgan"
+import path from "path";
 
 import routes from "./routes/index.js"
+import { fileURLToPath } from 'url';
+
+// Required in ES Module scope:
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+
+
 dotenv.config()
 
 const app = express();
@@ -35,6 +44,8 @@ app.get("/", async (req, res) => {
 //http:localhost:500/api-v1/
 app.use("/api-v1",routes);
 
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // error middleware 
 app.use((err, req, res, next) => {
     console.log(err.stack);

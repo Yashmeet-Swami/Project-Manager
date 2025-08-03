@@ -20,6 +20,7 @@ const userSchema = new Schema({
     },
      profilePicture: {
       type: String,
+      default: '', // Stores path like "/uploads/profile-photos/filename.jpg"
     },
     isEmailVerified: {
       type: Boolean,
@@ -39,6 +40,25 @@ const userSchema = new Schema({
     twoFAOtpExpires: {
       type: Date,
       select: false,
+    },
+    // ✅ New settings field
+    settings: {
+      notifications: {
+        type: Boolean,
+        default: true,
+      },
+      newsletter: {
+        type: Boolean,
+        default: false,
+      },
+      darkMode: {
+        type: Boolean,
+        default: false,
+      },
+      language: {
+        type: String,
+        default: "en",
+      },
     },
   },
   {

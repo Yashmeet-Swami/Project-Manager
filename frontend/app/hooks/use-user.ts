@@ -1,17 +1,21 @@
+import { fetchData, updateData, postData, postFormData } from "@/lib/fetch-util";
+import type { ChangePasswordFormData, ProfileFormData } from "@/routes/user/profile";
+import type { User } from "@/types";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { fetchData, updateData } from "@/lib/fetch-util";
-import type {
-  ChangePasswordFormData,
-  ProfileFormData,
-} from "@/routes/user/profile";
-import { useMutation, useQuery, type QueryKey } from "@tanstack/react-query";
-
-const queryKey: QueryKey = ["user"];
+const queryKey = ["user"];
 
 export const useUserProfileQuery = () => {
   return useQuery({
     queryKey,
-    queryFn: () => fetchData("/users/profile"),
+    queryFn: () => fetchData<User>("/users/profile"),
+  });
+};
+
+export const useUpdateUserProfile = () => {
+  return useMutation({
+    mutationFn: (data: ProfileFormData) =>
+      updateData("/users/profile", data),
   });
 };
 
@@ -22,8 +26,13 @@ export const useChangePassword = () => {
   });
 };
 
-export const useUpdateUserProfile = () => {
+
+
+export const useUpdateProfilePhoto = () => {
   return useMutation({
-    mutationFn: (data: ProfileFormData) => updateData("/users/profile", data),
+    mutationFn: async (formData: FormData) => {
+      const response = await postFormData("/users/profile/photo", formData);
+      return response.data; // Make sure to return the actual response data
+    },
   });
 };

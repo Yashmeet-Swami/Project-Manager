@@ -4,13 +4,18 @@ import {
   changePassword,
   getUserProfile,
   updateUserProfile,
+  uploadProfilePhoto
 } from "../controllers/user.js";
-import { z } from "zod";
 import { validateRequest } from "zod-express-middleware";
+import { z } from "zod";
+import upload from "../multer-config.js";
 
 const router = express.Router();
 
+// GET User profile
 router.get("/profile", authenticateUser, getUserProfile);
+
+// PUT Update profile info
 router.put(
   "/profile",
   authenticateUser,
@@ -23,6 +28,14 @@ router.put(
   updateUserProfile
 );
 
+router.post("/profile/photo", 
+  authenticateUser,
+  upload.single("avatar"),
+  uploadProfilePhoto  // ✅ Call this
+);
+
+
+// PUT Change password
 router.put(
   "/change-password",
   authenticateUser,

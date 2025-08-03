@@ -46,6 +46,8 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
+import { useUpdateProfilePhoto } from "@/hooks/use-user";
+import { useState, useRef } from "react";
 
 const changePasswordSchema = z
   .object({
@@ -77,6 +79,10 @@ const Profile = () => {
   };
   const { logout } = useAuth();
   const navigate = useNavigate();
+
+  const [preview, setPreview] = useState<string | null>(null);
+const fileInputRef = useRef<HTMLInputElement>(null);
+const { mutateAsync: updateProfilePhoto } = useUpdateProfilePhoto();
 
   const form = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
@@ -146,6 +152,51 @@ const Profile = () => {
     );
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    toast.error('Invalid file type', {
+      description: 'Please upload an image file (JPEG, PNG, etc.)'
+    });
+    return;
+  }
+
+  if (file.size > 2 * 1024 * 1024) {
+    toast.error('File too large', {
+      description: 'Please upload an image smaller than 2MB'
+    });
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => setPreview(reader.result as string);
+  reader.readAsDataURL(file);
+};
+
+const handlePhotoUpload = async () => {
+  if (!fileInputRef.current?.files?.[0]) return;
+  
+  const toastId = toast.loading('Uploading profile photo...');
+  
+  try {
+    const formData = new FormData();
+    formData.append('avatar', fileInputRef.current.files[0]);
+    
+    await updateProfilePhoto(formData);
+    toast.success('Profile photo updated successfully', {
+      id: toastId
+    });
+    setPreview(null);
+  } catch (error) {
+    toast.error('Failed to update profile photo', {
+      id: toastId,
+      description: error instanceof Error ? error.message : 'Please try again later'
+    });
+  }
+};
+
   if (isPending)
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex justify-center items-center">
@@ -178,48 +229,79 @@ const Profile = () => {
 
 
             {/* Left sidebar - Profile Summary - now takes appropriate space */}
-            <div className="lg:w-1/3">
-              <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm h-full">
-                <CardContent className="pt-8">
-                  <div className="text-center">
-                    <div className="relative inline-block">
-                      <Avatar className="h-32 w-32 mx-auto ring-4 ring-white shadow-2xl">
-                        <AvatarImage
-                          src={profileForm.watch("profilePicture") || user?.profilePicture}
-                          alt={user?.name}
-                          className="object-cover"
-                        />
-                        <AvatarFallback className="text-2xl bg-gradient-to-br from-indigo-400 to-purple-500 text-white">
-                          {user?.name?.charAt(0) || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <button className="absolute bottom-2 right-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 shadow-lg transition-colors">
-                        <Camera className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <h2 className="mt-4 text-2xl font-bold text-gray-900">{user?.name}</h2>
-                    <p className="text-gray-600 flex items-center justify-center gap-2 mt-2">
-                      <Mail className="h-4 w-4" />
-                      {user?.email}
-                    </p>
-                    <div className="mt-6 pt-6 border-t border-gray-200">
-                      <div className="grid grid-cols-2 gap-4 text-center">
-                        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3">
-                          <UserIcon className="h-6 w-6 text-indigo-600 mx-auto mb-1" />
-                          <p className="text-sm font-medium text-gray-900">Member</p>
-                          <p className="text-xs text-gray-600">Since {memberSinceYear}</p>
-                        </div>
-                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3">
-                          <Shield className="h-6 w-6 text-emerald-600 mx-auto mb-1" />
-                          <p className="text-sm font-medium text-gray-900">Verified</p>
-                          <p className="text-xs text-gray-600">Account</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+<div className="lg:w-1/3">
+  <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm h-full">
+    <CardContent className="pt-8">
+      <div className="text-center">
+        <div className="relative inline-block">
+          <Avatar className="h-32 w-32 mx-auto ring-4 ring-white shadow-2xl">
+            <AvatarImage
+              src={preview || profileForm.watch("profilePicture") || user?.profilePicture}
+              alt={user?.name}
+              className="object-cover"
+            />
+            <AvatarFallback className="text-2xl bg-gradient-to-br from-indigo-400 to-purple-500 text-white">
+              {user?.name?.charAt(0) || "U"}
+            </AvatarFallback>
+          </Avatar>
+          <button 
+            className="absolute bottom-2 right-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 shadow-lg transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <Camera className="h-4 w-4" />
+          </button>
+          <Input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+        </div>
+        
+        {preview && (
+          <div className="mt-4 flex justify-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setPreview(null);
+                if (fileInputRef.current) fileInputRef.current.value = '';
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handlePhotoUpload}
+              className="bg-indigo-600 hover:bg-indigo-700"
+            >
+              Save Photo
+            </Button>
+          </div>
+        )}
+        
+        <h2 className="mt-4 text-2xl font-bold text-gray-900">{user?.name}</h2>
+        <p className="text-gray-600 flex items-center justify-center gap-2 mt-2">
+          <Mail className="h-4 w-4" />
+          {user?.email}
+        </p>
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="grid grid-cols-2 gap-4 text-center">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3">
+              <UserIcon className="h-6 w-6 text-indigo-600 mx-auto mb-1" />
+              <p className="text-sm font-medium text-gray-900">Member</p>
+              <p className="text-xs text-gray-600">Since {memberSinceYear}</p>
             </div>
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-3">
+              <Shield className="h-6 w-6 text-emerald-600 mx-auto mb-1" />
+              <p className="text-sm font-medium text-gray-900">Verified</p>
+              <p className="text-xs text-gray-600">Account</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+</div>
 
             {/* Right content - Forms - now takes more space */}
             <div className="lg:w-2/3 space-y-8">

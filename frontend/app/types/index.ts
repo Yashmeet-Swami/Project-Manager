@@ -5,8 +5,21 @@ export interface User {
     createdAt: Date;
     isEmailVerified: boolean;
     updatedAt : Date;
-    profilePicture ?: string;
+    profilePicture?: string;
 }
+
+// types.ts or in use-settings.ts itself
+export interface Settings {
+  notifications: boolean;
+  newsletter: boolean;
+  darkMode: boolean;
+  language: string;
+}
+
+export interface SettingsResponse {
+  settings: Settings;
+}
+
 
 export interface Workspace {
     _id : string;
@@ -188,3 +201,4 @@ export interface WorkspaceProductivityData {
   completed: number;
   total: number;
 }
+

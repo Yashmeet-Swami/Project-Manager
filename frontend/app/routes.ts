@@ -30,10 +30,12 @@ export default [
             "members",
             "routes/dashboard/members.tsx"
         ),
+        route("settings", "routes/dashboard/settings.tsx"),
     ]),
 
     route("workspace-invite/:workspaceId"
         , "routes/dashboard/workspaces/workspace-invite.tsx"),
+
 
     layout("routes/user/user-layout.tsx", [
         route("user/profile", "routes/user/profile.tsx")
