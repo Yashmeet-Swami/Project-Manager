@@ -15,11 +15,17 @@ import type {
   WorkspaceProductivityData,
 } from "@/types";
 import { useNavigate, useSearchParams } from "react-router"; // ✅ Fixed import
+import { useOutletContext } from "react-router";
+
+type DashboardContext = {
+  onCreateWorkspace: () => void;
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const workspaceId = searchParams.get("workspaceId");
+  const { onCreateWorkspace } = useOutletContext<DashboardContext>();
 
   const { data, isPending } = useGetWorkspaceStatsQuery(workspaceId) as {
     data: {
@@ -37,7 +43,7 @@ const Dashboard = () => {
   // 🟥 When no workspace selected
   if (!workspaceId) {
     return (
-<div className="min-h-[80vh] pt-12 pb-12 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-start justify-center">
+      <div className="min-h-[80vh] pt-12 pb-12 px-6 bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-start justify-center">
         <div className="max-w-md w-full">
           {/* Card */}
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-8 text-center relative overflow-hidden">
@@ -64,47 +70,49 @@ const Dashboard = () => {
             </div>
 
             <h2 className="text-2xl font-bold text-gray-800 mb-3">Welcome to Your Dashboard</h2>
-            <p className="text-gray-600 mb-2">No workspace selected</p>
             <p className="text-sm text-gray-500 mb-8 leading-relaxed">
               Choose a workspace to view your projects, tasks, and analytics. Get started by selecting an existing workspace or creating a new one.
             </p>
 
             <div className="space-y-3">
+              {/* Select Workspace → Go to workspace selection page */}
               <Button
                 onClick={() => navigate('/workspaces')}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-normal py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200"
               >
                 Select Workspace
               </Button>
 
+              {/* Create Workspace → Open modal from layout */}
               <Button
                 variant="outline"
-                onClick={() => navigate('/workspaces')}
+                onClick={onCreateWorkspace} // 🔹 Now triggers CreateWorkspace modal
                 className="w-full border-2 border-gray-200 hover:border-purple-300 text-gray-700 hover:text-purple-700 font-semibold py-3 px-6 rounded-xl hover:bg-purple-50 transition-all duration-200"
               >
                 Create New Workspace
               </Button>
             </div>
+
           </div>
 
-          {/* Mini tips or actions */}
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-gray-100">
-              <div className="w-8 h-8 mx-auto mb-2 bg-blue-100 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          {/* Mini actions */}
+          <div className="mt-8 grid grid-cols-2 gap-4">
+            <div className="group bg-white/70 backdrop-blur-md rounded-xl p-4 text-center border border-gray-100 hover:shadow-lg transition-all duration-200">
+              <div className="w-10 h-10 mx-auto mb-2 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <p className="text-xs font-medium text-gray-600">Track Progress</p>
+              <p className="text-sm font-medium text-gray-600">Track Progress</p>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-sm rounded-xl p-4 text-center border border-gray-100">
-              <div className="w-8 h-8 mx-auto mb-2 bg-purple-100 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+            <div className="group bg-white/70 backdrop-blur-md rounded-xl p-4 text-center border border-gray-100 hover:shadow-lg transition-all duration-200">
+              <div className="w-10 h-10 mx-auto mb-2 bg-purple-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
                 </svg>
               </div>
-              <p className="text-xs font-medium text-gray-600">View Analytics</p>
+              <p className="text-sm font-medium text-gray-600">View Analytics</p>
             </div>
           </div>
         </div>
