@@ -22,7 +22,10 @@ export const clientLoader = async() => {
 const dashboardLayout = () => {
   const { isAuthenticated , isLoading } = useAuth();
   const [isCreatingWorkspace , setIsCreatingWorkspace] = useState(false);
-  const [currentWorkspace , setCurrentWorkspace] = useState<Workspace | null>(null)
+const [currentWorkspace , setCurrentWorkspace] = useState<Workspace | null>(() => {
+  const stored = localStorage.getItem("selectedWorkspace");
+  return stored ? JSON.parse(stored) : null;
+});
 
 
   if(isLoading){

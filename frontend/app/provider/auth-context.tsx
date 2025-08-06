@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (isJwtExpired) {
           await logout();
           window.dispatchEvent(new Event("force-logout"));
-          navigate("/sign-in");
+          navigate("/");
         }
 
         return Promise.reject(error);
@@ -98,6 +98,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("selectedWorkspace");
 
     delete axios.defaults.headers.common["Authorization"]; // ✅ Remove token from axios
 

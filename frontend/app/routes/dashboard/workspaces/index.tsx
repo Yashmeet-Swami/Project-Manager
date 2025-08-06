@@ -1,4 +1,3 @@
-
 import { NoDataFound } from "@/components/no-data-found";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,7 +13,7 @@ import { useGetWorkspacesQuery } from "@/hooks/use-workspace";
 import type { Workspace } from "@/types";
 import { PlusCircle, Users } from "lucide-react";
 import { useState } from "react";
-import { Link, useLoaderData } from "react-router";
+import { Link } from "react-router";
 import { format } from "date-fns";
 import { Loader } from "@/components/ui/loader";
 
@@ -32,31 +31,40 @@ const Workspaces = () => {
   return (
     <>
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        {/* Header */}
+        <div className="flex items-center justify-between flex-wrap gap-y-4">
           <h2 className="text-xl md:text-3xl font-bold">Workspaces</h2>
 
-          <Button onClick={() => setIsCreatingWorkspace(true)}>
+          <Button
+            onClick={() => setIsCreatingWorkspace(true)}
+            className="bg-blue-600 text-white hover:bg-blue-700"
+          >
             <PlusCircle className="size-4 mr-2" />
             New Workspace
           </Button>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Workspace Grid */}
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {workspaces.map((ws) => (
             <WorkspaceCard key={ws._id} workspace={ws} />
           ))}
 
+          {/* Empty State */}
           {workspaces.length === 0 && (
-            <NoDataFound
-              title="No workspaces found"
-              description="Create a new workspace to get started"
-              buttonText="Create Workspace"
-              buttonAction={() => setIsCreatingWorkspace(true)}
-            />
+            <div className="col-span-full">
+              <NoDataFound
+                title="No workspaces found"
+                description="Create a new workspace to get started"
+                buttonText="Create Workspace"
+                buttonAction={() => setIsCreatingWorkspace(true)}
+              />
+            </div>
           )}
         </div>
       </div>
 
+      {/* Modal */}
       <CreateWorkspace
         isCreatingWorkspace={isCreatingWorkspace}
         setIsCreatingWorkspace={setIsCreatingWorkspace}
@@ -68,14 +76,14 @@ const Workspaces = () => {
 const WorkspaceCard = ({ workspace }: { workspace: Workspace }) => {
   return (
     <Link to={`/workspaces/${workspace._id}`}>
-      <Card className="transition-all hover:shadow-md hover:-translate-y-1">
+      <Card className="transition-all hover:shadow-lg hover:-translate-y-1 hover:border-primary/40">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               <WorkspaceAvatar name={workspace.name} color={workspace.color} />
 
               <div>
-                <CardTitle>{workspace.name}</CardTitle>
+                <CardTitle className="text-base">{workspace.name}</CardTitle>
                 <span className="text-xs text-muted-foreground">
                   Created at {format(workspace.createdAt, "MMM d, yyyy h:mm a")}
                 </span>
@@ -88,14 +96,14 @@ const WorkspaceCard = ({ workspace }: { workspace: Workspace }) => {
             </div>
           </div>
 
-          <CardDescription>
+          <CardDescription className="line-clamp-2 mt-2">
             {workspace.description || "No description"}
           </CardDescription>
         </CardHeader>
 
-        <CardContent>
-          <div className="text-sm text-muted-foreground">
-            View workspace details and projects
+        <CardContent className="pt-2">
+          <div className="text-sm font-medium text-blue-600 hover:underline">
+            View workspace details →
           </div>
         </CardContent>
       </Card>

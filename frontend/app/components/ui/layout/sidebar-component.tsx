@@ -60,7 +60,7 @@ export const SidebarComponent = ({
             isCollapsed ? "w-16 md:w[80px]" : "w-16 md:w-[240px]"
         )} >
 
-            <div className="flex h-14 items-center border-b px-4 mb-4">
+            <div className="flex h-14 items-center border-b px-4">
                 <Link to="/dashboard" className="flex items-center">
                     {!isCollapsed && (
                         <div className="flex items-center gap-2">

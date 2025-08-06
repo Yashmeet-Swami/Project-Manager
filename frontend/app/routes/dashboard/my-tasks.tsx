@@ -99,10 +99,10 @@ const MyTasks = () => {
     });
 
     const todoTasks = sortedTasks.filter((task) => task.status === "To Do");
-  const inProgressTasks = sortedTasks.filter(
-    (task) => task.status === "In Progress"
-  );
-  const doneTasks = sortedTasks.filter((task) => task.status === "Done");
+    const inProgressTasks = sortedTasks.filter(
+        (task) => task.status === "In Progress"
+    );
+    const doneTasks = sortedTasks.filter((task) => task.status === "Done");
 
     if (isLoading)
         return (
@@ -113,14 +113,10 @@ const MyTasks = () => {
 
     return (
         <div className="space-y-6">
-            <div className="flex items-start md:items-center justify-between">
+            <div className="flex items-start md:items-center justify-between flex-wrap gap-3">
                 <h1 className="text-2xl font-bold">My Tasks</h1>
 
-                <div
-                    className="flex flex-col items-start md:flex-row md"
-                    itemScope
-                    gap-2
-                >
+                <div className="flex flex-col items-start md:flex-row gap-2">
                     <Button
                         variant={"outline"}
                         onClick={() =>
@@ -255,7 +251,7 @@ const MyTasks = () => {
                                 ))}
 
                                 {sortedTasks?.length === 0 && (
-                                    <div className="p-4 text-center text-sm text-muted-foreground">
+                                    <div className="p-6 text-center text-sm text-muted-foreground">
                                         No tasks found
                                     </div>
                                 )}

@@ -25,6 +25,8 @@ export const Header = ({
   const isOnWorkspacePage = useLocation().pathname.includes("/workspace");
 
   const handleOnClick = (workspace: Workspace) => {
+    localStorage.setItem("selectedWorkspace" , JSON.stringify(workspace));
+
     onWorkspaceSelected(workspace);
     const location = window.location;
 
@@ -39,7 +41,7 @@ export const Header = ({
 
   return (
     <div className="bg-background sticky top-0 z-40 border-b">
-      <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
+      <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant={"outline"}>
