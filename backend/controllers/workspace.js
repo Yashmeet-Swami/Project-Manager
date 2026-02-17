@@ -54,7 +54,6 @@ const validateWorkspaceId = (workspaceId) => {
   }
 };
 
-// Update getWorkspaceDetails to include proper error handling
 const getWorkspaceDetails = async (req, res) => {
   try {
     const { workspaceId } = req.params;
@@ -164,6 +163,7 @@ const getWorkspaceStats = async (req, res) => {
     const totalProjectInProgress = projects.filter(
       (project) => project.status === "In Progress"
     ).length;
+    
     // const totalProjectCompleted = projects.filter(
     //   (project) => project.status === "Completed"
     // ).length;

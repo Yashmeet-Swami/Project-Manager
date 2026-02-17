@@ -53,19 +53,6 @@ const registerUser = async (req, res) => {
 
 
         // send email
-
-        // const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
-        // const emailBody = `<p>Click <a href="${verificationLink}">here</a> to verify your email</p>`;
-        // const emailSubject = "Verify your email";
-
-        // const isEmailSent = await sendEmail(email , emailSubject,emailBody);
-
-        // if(!isEmailSent){
-        //     return res.status(500).json({
-        //         message: "failed to send verification email",
-        //     })
-        // }
-
         const verificationLink = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
         const emailBody = `<p>Click <a href="${verificationLink}">here</a> to verify your email</p>`;
         const emailSubject = "Verify your email";

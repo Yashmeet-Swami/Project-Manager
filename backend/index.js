@@ -41,6 +41,7 @@ app.get("/", async (req, res) => {
     });
 });
 
+
 //http:localhost:500/api-v1/
 app.use("/api-v1",routes);
 
