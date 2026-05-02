@@ -7,6 +7,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Include cookies in requests
 });
 
 api.interceptors.request.use((config) => {
@@ -20,14 +21,38 @@ api.interceptors.request.use((config) => {
 // Add a global handler for 401 errors
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      // Dispatch a custom event to trigger logout in AuthProvider
-      window.dispatchEvent(new Event("force-logout"));
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (
+      error.response?.status === 401 &&
+      error.response?.data?.message === "jwt expired" &&
+      !originalRequest._retry
+    ) {
+      originalRequest._retry = true;
+
+      try {
+        const response = await api.post("/auth/refresh-token");
+        const newToken = response.data.token;
+
+        localStorage.setItem("token", newToken);
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+        return api(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("selectedWorkspace");
+        window.dispatchEvent(new Event("force-logout"));
+
+        return Promise.reject(refreshError);
+      }
     }
+
     return Promise.reject(error);
   }
 );
+
 
 const postData = async <T>(url: string, data: unknown): Promise<T> => {
   const response = await api.post(url, data);
@@ -53,16 +78,19 @@ const deleteData = async <T>(url: string): Promise<T> => {
   return response.data;
 };
 
-// In your fetch-util.ts
+
 export const postFormData = async (url: string, formData: FormData) => {
   const response = await axios.post(`${BASE_URL}${url}`, formData, {
+    withCredentials: true,
     headers: {
-      'Content-Type': 'multipart/form-data',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
+      "Content-Type": "multipart/form-data",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
   });
-  return response; // Return full response object
+
+  return response;
 };
+
 
 
 export { postData, fetchData, updateData, deleteData };

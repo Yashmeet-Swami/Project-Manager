@@ -4,6 +4,8 @@ import express from "express"
 import mongoose from "mongoose"
 import morgan from "morgan"
 import path from "path";
+import cookieParser from "cookie-parser";
+
 
 import routes from "./routes/index.js"
 import { fileURLToPath } from 'url';
@@ -18,13 +20,22 @@ dotenv.config()
 
 const app = express();
 
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: allowedOrigins,
     methods: ["GET", "POST","DELETE","PUT"],
     allowedHeaders:['Content-Type',"Authorization"],
+    credentials: true,
     })
 );
+
 app.use(morgan("dev"));
+app.use(express.json());
+app.use(cookieParser());
 
 //db connection
 mongoose.connect(process.env.MONGODB_URI).then(()=> 

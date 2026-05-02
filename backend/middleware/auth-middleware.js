@@ -20,7 +20,14 @@ const authMiddleware = async (req, res, next) => {
 
         // Continue with token verification logic...
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+
+        if (decoded.purpose !== "access-token") {
+            return res.status(401).json({
+                message: "Invalid token purpose",
+            });
+        }
+
         const user = await User.findById(decoded.userId);
 
 
@@ -34,6 +41,18 @@ const authMiddleware = async (req, res, next) => {
         next();
 
     } catch (error) {
+        if (error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                message: "jwt expired",
+            });
+        }
+
+        if (error.name === "JsonWebTokenError") {
+            return res.status(401).json({
+                message: "Invalid token",
+            });
+        }
+
         console.log(error);
         res.status(500).json({
             message: "Internal server error",
