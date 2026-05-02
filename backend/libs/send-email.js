@@ -32,16 +32,21 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: String(process.env.SMTP_SECURE || "true") === "true",
+  connectionTimeout: 15000,
+  greetingTimeout: 10000,
+  socketTimeout: 20000,
   auth: {
-    user: process.env.EMAIL_USER,      // your Gmail address
-    pass: process.env.EMAIL_PASS,      // App Password (not your Gmail password)
+    user: process.env.EMAIL_USER?.trim(),
+    pass: process.env.EMAIL_PASS?.trim(),
   },
 });
 
 export const sendEmail = async (to, subject, html) => {
   const mailOptions = {
-    from: `"TaskSync" <${process.env.EMAIL_USER}>`,
+    from: `"TaskSync" <${process.env.EMAIL_USER?.trim()}>`,
     to,
     subject,
     html,
