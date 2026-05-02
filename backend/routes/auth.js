@@ -15,7 +15,9 @@ import {
     loginUser,
     verifyEmail,
     resetPasswordRequest,
-    verifyResetPasswordTokenAndResetPassword
+    verifyResetPasswordTokenAndResetPassword,
+    refreshAccessToken,
+    logoutUser,
 } from "../controllers/auth-controller.js";
 
 
@@ -58,4 +60,6 @@ router.post(
     verifyResetPasswordTokenAndResetPassword
 );
 
+router.post("/refresh-token", refreshAccessToken);
+router.post("/logout", logoutUser);
 export default router;

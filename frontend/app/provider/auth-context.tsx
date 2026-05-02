@@ -52,8 +52,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // ✅ Global auto-logout on jwt expired
   useEffect(() => {
     const interceptor = axios.interceptors.response.use(
-      response => response,
-      async error => {
+      (response) => response,
+      async (error) => {
         const isJwtExpired =
           error.response?.status === 401 &&
           error.response?.data?.message === "jwt expired";
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
 
     return () => {
@@ -96,6 +96,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const logout = async () => {
+    try {
+      await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/logout`,
+        {},
+        { withCredentials: true },
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("selectedWorkspace");
@@ -108,7 +118,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider
+      value={{ user, isAuthenticated, isLoading, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

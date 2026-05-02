@@ -4,6 +4,9 @@ import jwt from "jsonwebtoken";
 import Verification from "../models/verification.js";
 import { sendEmail } from "../libs/send-email.js";
 import aj from "../libs/arcjet.js";
+import { generateAccessToken, generateRefreshToken } from "../libs/token.js";
+
+
 //import verification from "../models/verification.js";
 const registerUser = async (req, res) => {
     try {
@@ -76,6 +79,48 @@ const registerUser = async (req, res) => {
     }
 };
 
+const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        message: "No refresh token provided",
+      });
+    }
+
+    const payload = jwt.verify(
+      refreshToken,
+      process.env.REFRESH_TOKEN_SECRET
+    );
+
+    if (payload.purpose !== "refresh-token") {
+      return res.status(401).json({
+        message: "Invalid refresh token",
+      });
+    }
+
+    const user = await User.findById(payload.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        message: "User not found",
+      });
+    }
+
+    const accessToken = generateAccessToken(user._id);
+
+    res.status(200).json({
+      token: accessToken,
+    });
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid or expired refresh token",
+    });
+  }
+};
+
+
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -137,11 +182,15 @@ const loginUser = async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        const token = jwt.sign(
-            { userId: user._id, purpose: "login" },
-            process.env.JWT_SECRET,
-            { expiresIn: "7d" }
-        );
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
 
         user.lastLogin = new Date();
         await user.save();
@@ -151,7 +200,7 @@ const loginUser = async (req, res) => {
 
         res.status(200).json({
             message: "Login Successful",
-            token,
+            token: accessToken,
             user: userData, // Fixed: use userData instead of user
         });
 
@@ -328,4 +377,25 @@ const verifyResetPasswordTokenAndResetPassword = async (req, res) => {
   }
 };
 
-export { registerUser, loginUser, verifyEmail, resetPasswordRequest, verifyResetPasswordTokenAndResetPassword };
+const logoutUser = async (req, res) => {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
+
+  res.status(200).json({
+    message: "Logged out successfully",
+  });
+};
+
+
+export {
+    registerUser,
+    loginUser,
+    verifyEmail,
+    resetPasswordRequest,
+    verifyResetPasswordTokenAndResetPassword,
+    refreshAccessToken,
+    logoutUser,
+};
