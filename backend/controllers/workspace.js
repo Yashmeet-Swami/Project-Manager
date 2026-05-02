@@ -1,7 +1,6 @@
 import Workspace from "../models/workspace.js";
 import WorkspaceInvite from "../models/workspace-invite.js";
 import Project from "../models/project.js";
-import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../libs/send-email.js";
 import User from "../models/user.js";
@@ -48,32 +47,12 @@ const getWorkspaces = async (req, res) => {
     }
 }
 
-const validateWorkspaceId = (workspaceId) => {
-  if (!workspaceId || !mongoose.Types.ObjectId.isValid(workspaceId)) {
-    throw new Error('Invalid workspace ID');
-  }
-};
-
 const getWorkspaceDetails = async (req, res) => {
   try {
-    const { workspaceId } = req.params;
-    validateWorkspaceId(workspaceId);
-
-    const workspace = await Workspace.findById(workspaceId)
-      .populate("members.user", "name email profilePicture");
-
-    if (!workspace) {
-      return res.status(404).json({ message: "Workspace not found" });
-    }
-
-    // Check if user is member
-    const isMember = workspace.members.some(
-      member => member.user._id.toString() === req.user._id.toString()
+    const workspace = await req.workspace.populate(
+      "members.user",
+      "name email profilePicture"
     );
-
-    if (!isMember) {
-      return res.status(403).json({ message: "Access denied" });
-    }
 
     res.status(200).json(workspace);
   } catch (error) {
@@ -85,19 +64,36 @@ const getWorkspaceDetails = async (req, res) => {
   }
 };
 
+const getWorkspaceInviteInfo = async (req, res) => {
+  try {
+    const { workspaceId } = req.params;
+
+    const workspace = await Workspace.findById(workspaceId).select(
+      "name description color"
+    );
+
+    if (!workspace) {
+      return res.status(404).json({
+        message: "Workspace not found",
+      });
+    }
+
+    res.status(200).json(workspace);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+};
+
 const getWorkspaceProjects = async (req, res) => {
     try {
         const { workspaceId } = req.params;
-        const workspace = await Workspace.findOne({
-            _id: workspaceId,
-            "members.user": req.user._id,
-        }).populate("members.user", "name email profilePicture");
-
-        if (!workspace) {
-            return res.status(404).json({
-                message: "Workspace not found",
-            });
-        }
+        const workspace = await req.workspace.populate(
+            "members.user",
+            "name email profilePicture"
+        );
 
         const projects = await Project.find({
             workspace: workspaceId,
@@ -120,31 +116,6 @@ const getWorkspaceProjects = async (req, res) => {
 const getWorkspaceStats = async (req, res) => {
   try {
     const { workspaceId } = req.params;
-
-    // Add ObjectId validation
-    if (!mongoose.Types.ObjectId.isValid(workspaceId)) {
-      return res.status(400).json({ 
-        message: "Invalid workspace ID format" 
-      });
-    }
-
-    const workspace = await Workspace.findById(workspaceId);
-
-    if (!workspace) {
-      return res.status(404).json({
-        message: "Workspace not found",
-      });
-    }
-
-    const isMember = workspace.members.some(
-      (member) => member.user.toString() === req.user._id.toString()
-    );
-
-    if (!isMember) {
-      return res.status(403).json({
-        message: "You are not a member of this workspace",
-      });
-    }
 
     const [totalProjects, projects] = await Promise.all([
       Project.countDocuments({ workspace: workspaceId }),
@@ -345,23 +316,7 @@ const inviteUserToWorkspace = async (req, res) => {
     const { workspaceId } = req.params;
     const { email, role } = req.body;
 
-    const workspace = await Workspace.findById(workspaceId);
-
-    if (!workspace) {
-      return res.status(404).json({
-        message: "Workspace not found",
-      });
-    }
-
-    const userMemberInfo = workspace.members.find(
-      (member) => member.user.toString() === req.user._id.toString()
-    );
-
-    if (!userMemberInfo || !["admin", "owner"].includes(userMemberInfo.role)) {
-      return res.status(403).json({
-        message: "You are not authorized to invite members to this workspace",
-      });
-    }
+    const workspace = req.workspace;
 
     const existingUser = await User.findOne({ email });
 
@@ -563,6 +518,7 @@ export {
     createWorkspace,
     getWorkspaces,
     getWorkspaceDetails,
+    getWorkspaceInviteInfo,
     getWorkspaceProjects,
     getWorkspaceStats,
     inviteUserToWorkspace,

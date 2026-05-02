@@ -14,6 +14,8 @@ interface WorkspaceHeaderProps {
     }[];
     onCreateProject: () => void;
     onInviteMember: () => void;
+    canCreateProject: boolean;
+    canInviteMember: boolean;
 }
 
 export const WorkspaceHeader = ({
@@ -21,6 +23,8 @@ export const WorkspaceHeader = ({
     members,
     onCreateProject,
     onInviteMember,
+    canCreateProject,
+    canInviteMember,
 }: WorkspaceHeaderProps) => {
 
     return (
@@ -38,14 +42,18 @@ export const WorkspaceHeader = ({
                     </div>
 
                     <div className="flex items-center gap-3 justify-between md:justify-start mb-4 md:mb-0">
-                        <Button variant={"outline"} onClick={onInviteMember}>
-                            <UserPlus className="size-4 mr-2" />
-                            Invite
-                        </Button>
-                        <Button onClick={onCreateProject}>
-                            <Plus className="size-4 mr-2" />
-                            Create Project
-                        </Button>
+                        {canInviteMember && (
+                            <Button variant={"outline"} onClick={onInviteMember}>
+                                <UserPlus className="size-4 mr-2" />
+                                Invite
+                            </Button>
+                        )}
+                        {canCreateProject && (
+                            <Button onClick={onCreateProject}>
+                                <Plus className="size-4 mr-2" />
+                                Create Project
+                            </Button>
+                        )}
 
                     </div>
                 </div>
@@ -59,19 +67,26 @@ export const WorkspaceHeader = ({
                 <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Members</span>
 
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-3">
                         {members.map((member) => (
-                            <Avatar
+                            <div
                                 key={member._id}
-                                className="relative h-8 w-8 rounded-full  border-2 border-background overflow-hidden"
-                                title={member.user.name}
+                                className="flex items-center gap-2"
+                                title={`${member.user.name} - ${member.role}`}
                             >
-                                <AvatarImage
-                                    src={member.user.profilePicture}
-                                    alt={member.user.name}
-                                />
-                                <AvatarFallback>{member.user.name.charAt(0)}</AvatarFallback>
-                            </Avatar>
+                                <Avatar
+                                    className="relative h-8 w-8 rounded-full border-2 border-background overflow-hidden"
+                                >
+                                    <AvatarImage
+                                        src={member.user.profilePicture}
+                                        alt={member.user.name}
+                                    />
+                                    <AvatarFallback>{member.user.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <span className="rounded-full border px-2 py-0.5 text-xs capitalize text-muted-foreground">
+                                    {member.role}
+                                </span>
+                            </div>
                         ))}
                     </div>
                 </div>

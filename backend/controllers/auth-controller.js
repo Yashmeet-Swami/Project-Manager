@@ -295,7 +295,7 @@ const resetPasswordRequest = async (req, res) => {
       { expiresIn: "15m" }
     );
 
-    await Verification.create({
+    const resetVerification = await Verification.create({
       userId: user._id,
       token: resetPasswordToken,
       expiresAt: new Date(Date.now() + 15 * 60 * 1000),
@@ -308,6 +308,8 @@ const resetPasswordRequest = async (req, res) => {
     const isEmailSent = await sendEmail(email, emailSubject, emailBody);
 
     if (!isEmailSent) {
+      await Verification.findByIdAndDelete(resetVerification._id);
+
       return res.status(500).json({
         message: "Failed to send reset password email",
       });

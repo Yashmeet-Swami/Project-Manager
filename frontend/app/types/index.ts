@@ -56,7 +56,7 @@ export interface Project {
   tasks: Task[];
   members: {
     user: User;
-    role: "admin" | "member" | "owner" | "viewer";
+    role: "manager" | "contributor" | "viewer";
   }[];
   createdAt: Date;
   updatedAt: Date;

@@ -11,7 +11,7 @@ import { WorkspaceAvatar } from "@/components/workspace/workspace-avatar";
 import {
   useAcceptGenerateInviteMutation,
   useAcceptInviteByTokenMutation,
-  useGetWorkspaceDetailsQuery,
+  useGetWorkspaceInviteInfoQuery,
 } from "@/hooks/use-workspace";
 import type { Workspace } from "@/types";
 import React from "react";
@@ -31,7 +31,7 @@ const WorkspaceInvite = () => {
     return <div>Workspace not found</div>;
   }
 
-  const { data: workspace, isLoading } = useGetWorkspaceDetailsQuery(
+  const { data: workspace, isLoading } = useGetWorkspaceInviteInfoQuery(
     workspaceId!
   ) as { data: Workspace; isLoading: boolean };
 

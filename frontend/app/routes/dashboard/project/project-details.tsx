@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProjectPermissions } from "@/hooks/use-permissions";
 import { UseProjectQuery } from "@/hooks/use-project";
 import { getProjectProgress } from "@/lib";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ const ProjectDetails = () => {
     };
     isLoading: boolean;
   };
+  const { canCreateTask } = useProjectPermissions(data?.project);
 
   if (isLoading)
     return (
@@ -74,7 +76,9 @@ const ProjectDetails = () => {
             </span>
           </div>
 
-          <Button onClick={() => setIsCreateTask(true)}>Add Task</Button>
+          {canCreateTask && (
+            <Button onClick={() => setIsCreateTask(true)}>Add Task</Button>
+          )}
         </div>
       </div>
 
@@ -174,12 +178,14 @@ const ProjectDetails = () => {
       </div>
 
       {/* create task dialog */}
-      <CreateTaskDialog
-        open={isCreateTask}
-        onOpenChange={setIsCreateTask}
-        projectId={projectId!}
-        projectMembers={project.members as any}
-      />
+      {canCreateTask && (
+        <CreateTaskDialog
+          open={isCreateTask}
+          onOpenChange={setIsCreateTask}
+          projectId={projectId!}
+          projectMembers={project.members as any}
+        />
+      )}
     </div>
   );
 };
