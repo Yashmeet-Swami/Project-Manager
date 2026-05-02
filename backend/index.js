@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 
 
 import routes from "./routes/index.js"
+import errorMiddleware from "./middleware/error-middleware.js";
 import { fileURLToPath } from 'url';
 
 // Required in ES Module scope:
@@ -58,13 +59,8 @@ app.use("/api-v1",routes);
 
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-// error middleware 
-app.use((err, req, res, next) => {
-    console.log(err.stack);
-    res.status(500).json({
-        message: "Internal server error",
-    });
-});
+
+app.use(errorMiddleware);
 
 //not found middleware
 app.use((req, res) => {

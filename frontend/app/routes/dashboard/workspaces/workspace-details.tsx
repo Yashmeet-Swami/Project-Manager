@@ -4,6 +4,7 @@ import { InviteMemberDialog } from "@/components/workspace/invite-member";
 import { ProjectList } from "@/components/workspace/project-list";
 import { WorkspaceHeader } from "@/components/workspace/workspace-header";
 import { useGetWorkspaceQuery } from "@/hooks/use-workspace";
+import { useWorkspacePermissions } from "@/hooks/use-permissions";
 import type { Project, Workspace } from "@/types";
 import { useState } from "react";
 import { useParams } from "react-router"
@@ -25,6 +26,10 @@ const WorkspaceDetails = () => {
         };
         isLoading: boolean;
     }
+    const { canCreateProject, canInviteMember } = useWorkspacePermissions(
+        data?.workspace
+    );
+
     if (isLoading) {
         return (
             <div>
@@ -32,6 +37,7 @@ const WorkspaceDetails = () => {
             </div>
         );
     }
+
     return (
         <div className="space-y-8">
             <WorkspaceHeader
@@ -39,26 +45,33 @@ const WorkspaceDetails = () => {
                 members={data?.workspace?.members as any}
                 onCreateProject={() => setIsCreateProject(true)}
                 onInviteMember={() => setIsInviteMember(true)}
+                canCreateProject={canCreateProject}
+                canInviteMember={canInviteMember}
             />
 
             <ProjectList
                 workspaceId={workspaceId}
                 projects={data.projects}
                 onCreateProject={() => setIsCreateProject(true)}
+                canCreateProject={canCreateProject}
             />
 
-            <CreateProjectDialog
-                isOpen={isCreateProject}
-                onOpenChange={setIsCreateProject}
-                workspaceId={workspaceId}
-                workspaceMembers={data.workspace.members as any}
-            />
+            {canCreateProject && (
+                <CreateProjectDialog
+                    isOpen={isCreateProject}
+                    onOpenChange={setIsCreateProject}
+                    workspaceId={workspaceId}
+                    workspaceMembers={data.workspace.members as any}
+                />
+            )}
 
-            <InviteMemberDialog
-                isOpen={isInviteMember}
-                onOpenChange={setIsInviteMember}
-                workspaceId={workspaceId}
-            />
+            {canInviteMember && (
+                <InviteMemberDialog
+                    isOpen={isInviteMember}
+                    onOpenChange={setIsInviteMember}
+                    workspaceId={workspaceId}
+                />
+            )}
 
 
         </div>
