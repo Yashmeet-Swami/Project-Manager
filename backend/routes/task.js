@@ -9,6 +9,7 @@ import {
   updateTaskStatus,
   updateTaskAssignees,
   updateTaskPriority,
+  updateTaskDueDate,
   addSubTask,
   updateSubTask,
   getActivityByResourceId,
@@ -113,7 +114,10 @@ router.put(
   authMiddleware,
   validateRequest({
     params: z.object({ taskId: z.string(), subTaskId: z.string() }),
-    body: z.object({ completed: z.boolean() }),
+    body: z.object({ 
+        completed: z.boolean().optional(),
+        title: z.string().optional()
+    }),
   }),
   updateSubTask
 );
@@ -168,6 +172,14 @@ router.put(
   updateTaskPriority
 );
 
-
+router.put(
+  "/:taskId/due-date",
+  authMiddleware,
+  validateRequest({
+    params: z.object({ taskId: z.string() }),
+    body: z.object({ dueDate: z.union([z.string(), z.date(), z.null()]) }),
+  }),
+  updateTaskDueDate
+);
 
 export default router;

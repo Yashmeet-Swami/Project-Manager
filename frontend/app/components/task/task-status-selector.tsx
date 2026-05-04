@@ -2,6 +2,14 @@ import { useUpdateTaskStatusMutation } from "@/hooks/use-task";
 import type { TaskStatus } from "@/types";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+
+const statusStyles = {
+  "To Do": "bg-slate-100 text-slate-700 hover:bg-slate-200 ring-slate-200",
+  "In Progress": "bg-amber-100 text-amber-700 hover:bg-amber-200 ring-amber-200",
+  "Done": "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 ring-emerald-200",
+};
 
 export const TaskStatusSelector = ({
     status,
@@ -10,34 +18,44 @@ export const TaskStatusSelector = ({
     status: TaskStatus;
     taskId: string;
 }) => {
-    const { mutate , isPending } = useUpdateTaskStatusMutation();
+    const [optimisticStatus, setOptimisticStatus] = useState<TaskStatus>(status);
+    
+    useEffect(() => {
+        setOptimisticStatus(status);
+    }, [status]);
 
-    const handleStatusChange = (value: string) =>{
+    const { mutate, isPending } = useUpdateTaskStatusMutation();
+
+    const handleStatusChange = (value: string) => {
+        const previousStatus = optimisticStatus;
+        setOptimisticStatus(value as TaskStatus);
+
         mutate(
             {taskId , status: value as TaskStatus },
             {
-                onSuccess: () => {
-                    toast.success("Status uploaded successfully");
-                },
                 onError: (error: any) => {
-                    const errormsg = error.response.data.message;
+                    setOptimisticStatus(previousStatus);
+                    const errormsg = error.response?.data?.message || "Failed to update status";
                     toast.error(errormsg);
-                    console.log(error);
                 }
             }
         )
     }
-    return (
-    <Select value={status || ""} onValueChange={handleStatusChange}>
-      <SelectTrigger className="w-[180px]" disabled={isPending}>
-        <SelectValue placeholder="Status" />
-      </SelectTrigger>
 
-      <SelectContent>
-        <SelectItem value="To Do">To Do</SelectItem>
-        <SelectItem value="In Progress">In Progress</SelectItem>
-        <SelectItem value="Done">Done</SelectItem>
-      </SelectContent>
-    </Select>
+    return (
+        <Select value={optimisticStatus || ""} onValueChange={handleStatusChange} disabled={isPending}>
+            <SelectTrigger className={cn("w-fit h-8 px-3 border-0 ring-1 ring-inset focus:ring-2 shadow-sm rounded-full transition-all", statusStyles[optimisticStatus] || statusStyles["To Do"])}>
+                <div className="flex items-center gap-2 text-xs font-medium">
+                    <div className={cn("w-1.5 h-1.5 rounded-full", optimisticStatus === "Done" ? "bg-emerald-500" : optimisticStatus === "In Progress" ? "bg-amber-500" : "bg-slate-500")} />
+                    <SelectValue placeholder="Status" />
+                </div>
+            </SelectTrigger>
+
+            <SelectContent>
+                <SelectItem value="To Do">To Do</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Done">Done</SelectItem>
+            </SelectContent>
+        </Select>
     )
 }

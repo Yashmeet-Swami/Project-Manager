@@ -22,9 +22,22 @@ export const UseCreateProject = () => {
   });
 };
 
-export const UseProjectQuery = (projectId: string) => {
+export const UseProjectQuery = (projectId: string, params?: Record<string, any>) => {
   return useQuery({
-    queryKey: ["project", projectId],
-    queryFn: () => fetchData(`/projects/${projectId}/tasks`),
+    queryKey: ["project", projectId, params],
+    queryFn: () => {
+      let queryString = "";
+      if (params) {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            queryParams.append(key, String(value));
+          }
+        });
+        const str = queryParams.toString();
+        if (str) queryString = `?${str}`;
+      }
+      return fetchData(`/projects/${projectId}/tasks${queryString}`);
+    },
   });
 };
