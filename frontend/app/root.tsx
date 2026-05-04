@@ -43,10 +43,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { TooltipProvider } from "./components/ui/tooltip";
+
 export default function App() {
   return (
     <ReactQueryProvider>
-      <Outlet />
+      <TooltipProvider delayDuration={300}>
+        <Outlet />
+      </TooltipProvider>
     </ReactQueryProvider>
   );
 }

@@ -399,7 +399,7 @@ const addSubTask = async (req, res) => {
 const updateSubTask = async (req, res) => {
   try {
     const { taskId, subTaskId } = req.params;
-    const { completed } = req.body;
+    const { completed, title } = req.body;
 
     const task = await Task.findById(taskId);
 
@@ -419,7 +419,8 @@ const updateSubTask = async (req, res) => {
       });
     }
 
-    subTask.completed = completed;
+    if (completed !== undefined) subTask.completed = completed;
+    if (title !== undefined) subTask.title = title;
     await task.save();
 
     // record activity
@@ -637,6 +638,46 @@ const getMyTasks = async (req, res) => {
   }
 };
 
+const updateTaskDueDate = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const { dueDate } = req.body;
+
+    const task = await Task.findById(taskId);
+
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    const project = await Project.findById(task.project);
+
+    if (!project) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    const isMember = project.members.some(
+      (member) => member.user.toString() === req.user._id.toString()
+    );
+
+    if (!isMember) {
+      return res.status(403).json({ message: "You are not a member of this project" });
+    }
+
+    const oldDate = task.dueDate;
+    task.dueDate = dueDate ? new Date(dueDate) : null;
+    await task.save();
+
+    await recordActivity(req.user._id, "updated_task", "Task", taskId, {
+      description: `updated due date`,
+    });
+
+    res.status(200).json(task);
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export {
   createTask,
   getTaskById,
@@ -645,6 +686,7 @@ export {
   updateTaskStatus,
   updateTaskAssignees,
   updateTaskPriority,
+  updateTaskDueDate,
   addSubTask,
   updateSubTask,
   getActivityByResourceId,

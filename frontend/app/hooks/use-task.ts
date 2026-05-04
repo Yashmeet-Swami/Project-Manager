@@ -136,10 +136,12 @@ export const useUpdateSubTaskMutation = () => {
     mutationFn: (data: {
       taskId: string;
       subTaskId: string;
-      completed: boolean;
+      completed?: boolean;
+      title?: string;
     }) =>
       updateData(`/tasks/${data.taskId}/update-subtask/${data.subTaskId}`, {
-        completed: data.completed,
+        ...(data.completed !== undefined && { completed: data.completed }),
+        ...(data.title !== undefined && { title: data.title }),
       }),
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({
@@ -215,7 +217,20 @@ export const useGetMyTasksQuery = () => {
     queryKey: ["my-tasks", "user"],
     queryFn: () => fetchData("/tasks/my-tasks"),
   });
+};export const useUpdateTaskDueDateMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: { taskId: string; dueDate: Date | null }) =>
+      updateData(`/tasks/${data.taskId}/due-date`, { dueDate: data.dueDate }),
+    onSuccess: (data: any) => {
+      queryClient.invalidateQueries({
+        queryKey: ["task", data._id],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["task-activity", data._id],
+      });
+    },
+  });
 };
-
-
 
